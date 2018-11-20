@@ -1,29 +1,40 @@
 package com.autonise.myapplication;
 
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 
-public class MainActivity extends FragmentActivity {
+import java.io.File;
 
-    DemoCollectionPagerAdapter mDemoCollectionPagerAdapter;
-    ViewPager mViewPager;
+public class MainActivity extends AppCompatActivity {
+
+    public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d("HI", "Hello");
+        File f = new File(getApplicationContext().getFilesDir()+"/User_information.json");
+        if(!f.exists()) {
+            first_time_welcome();
+        }
+        else
+        {
+            f.delete();
+            first_time_welcome();
+        }
 
-        mDemoCollectionPagerAdapter =
-                new DemoCollectionPagerAdapter(getSupportFragmentManager());
-        Log.d("HI", "Hello1");
-        mViewPager = findViewById(R.id.pager);
-        Log.d("HI", "Hello2");
-        mViewPager.setAdapter(mDemoCollectionPagerAdapter);
-        Log.d("HI", "Hello3");
+    }
+    public void first_time_welcome() {
+        Intent intent = new Intent(this, First_time_welcome_page.class);
+        startActivity(intent);
     }
 }
+
+
+
 

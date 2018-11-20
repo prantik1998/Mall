@@ -1,0 +1,34 @@
+/*For Reading*/
+            String line = "";
+
+            try{
+                BufferedReader reader = new BufferedReader(new FileReader(filename));
+
+
+                try{
+                    line = reader.readLine();
+                }
+                catch(IOException e)
+                {
+                    Log.d(TAG, e.getMessage());
+                }
+
+            }
+            catch(FileNotFoundException e)
+            {
+                Log.d(TAG, e.getMessage());
+            }
+            try{
+
+                JSONObject reader = new JSONObject(line);
+                try{
+                Log.d(TAG, reader.getString("DisplayName"));    //Way to get the values
+                }
+                catch(JSONException e)
+                {
+                    Log.d(TAG, e.getMessage());
+                }
+            }
+            catch(JSONException e) {
+                Log.d(TAG, e.getMessage());
+            }

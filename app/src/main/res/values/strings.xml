@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Autonise AI</string>
     <string name="first_welcome">Welcome to Autonise AI</string>
+    <string name="title_activity_first_time_welcome_page">First_time_welcome_page</string>
     <!--<string name="app_name">My Application</string>-->
     <!--<string name="app_name">My Application</string>-->
     <!--<string name="app_name">My Application</string>-->

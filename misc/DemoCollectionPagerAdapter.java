@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
 
 public class DemoCollectionPagerAdapter extends FragmentPagerAdapter {
     public DemoCollectionPagerAdapter(FragmentManager fm) {
@@ -14,7 +15,6 @@ public class DemoCollectionPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int i) {
         Fragment fragment = new DemoObjectFragment();
         Bundle args = new Bundle();
-        // Our object is just an integer :-P
         args.putInt(DemoObjectFragment.ARG_OBJECT, i + 1);
         fragment.setArguments(args);
         return fragment;
@@ -22,7 +22,7 @@ public class DemoCollectionPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 100;
+        return 3;
     }
 
     @Override

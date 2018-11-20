@@ -1,0 +1,3 @@
+//        DemoCollectionPagerAdapter mDemoCollectionPagerAdapter = new DemoCollectionPagerAdapter(getSupportFragmentManager());
+//        ViewPager mViewPager = findViewById(R.id.pager);
+//        mViewPager.setAdapter(mDemoCollectionPagerAdapter);
