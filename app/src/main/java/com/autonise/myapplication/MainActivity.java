@@ -18,11 +18,11 @@ public class MainActivity extends AppCompatActivity {
         if(!f.exists()) {
             first_time_welcome();
         }
-        else
-        {
-            f.delete();
-            first_time_welcome();
-        }
+//        else
+//        {
+//            f.delete();
+//            first_time_welcome();
+//        }
     }
     public void first_time_welcome() {
         Intent intent = new Intent(this, First_time_welcome_page.class);

@@ -1,10 +1,8 @@
 package com.autonise.myapplication;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,47 +19,36 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-//import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.KeyStore;
-import java.security.cert.CertificateFactory;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
+
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+
+import java.security.KeyStore;
+import java.security.cert.CertificateFactory;
 import java.security.cert.Certificate;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Calendar;
 
-import javax.net.ssl.TrustManagerFactory;
-import javax.security.cert.X509Certificate;
+import java.net.URL;
+import java.net.URLEncoder;
+
+import java.text.SimpleDateFormat;
 
 public class First_time_welcome_page extends AppCompatActivity {
 
     int RC_SIGN_IN = 0;
     String TAG = "tag:0";
-    String ERRORTAG = "errortag:0";
     String url="https://10.0.2.2:6012";
     int success = 1;
-//    String url="http://stackoverflow.com";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,12 +107,10 @@ public class First_time_welcome_page extends AppCompatActivity {
     private void handleSignInResult(GoogleSignInAccount account) {
         Log.d(TAG, "handleSignInResult");
         try {
-//            String filename = getApplicationContext().getFilesDir().toString()+"/User_information.json";
+            String filename = getApplicationContext().getFilesDir().toString()+"/User_information.json";
             Calendar c = Calendar.getInstance();
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String formattedDate = df.format(c.getTime());
-
-//            JSONObject obj = new JSONObject();
 
             Map<String,Object> obj_map = new LinkedHashMap<>();
 
@@ -142,38 +127,22 @@ public class First_time_welcome_page extends AppCompatActivity {
                 postData.append('=');
                 postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
             }
-            byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-
-
-//            obj.put("DisplayName", account.getDisplayName());
-//            obj.put("Email", account.getEmail());
-//            obj.put("Id", account.getId());
-//            obj.put("PhotoURL", account.getPhotoUrl());
-//            obj.put("Date", formattedDate);
             Log.d(TAG, "getting into http");
 
 
-            new send_data().execute(postDataBytes.toString());
+            new send_data().execute(postData.toString());
+
+            Secure_writer writer = new Secure_writer();
+            writer.write(obj_map.toString(), account.getDisplayName(), filename);
+//            Secure_reader reader = new Secure_reader();
+//            Log.d(TAG+"msg", reader.read(account.getDisplayName(), filename));
+
+
         }
         catch (java.io.UnsupportedEncodingException e)
         {
             Log.d(TAG+"0", e.getMessage());
         }
-//        catch (JSONException e) {
-//            success = 0;
-//            Log.d(TAG+"0", e.getMessage());
-//        }
-
-        try {
-            FileWriter file = new FileWriter(filename);
-            file.write(obj.toString());
-            file.flush();
-
-        } catch (IOException e) {
-            Log.d(TAG+"1", e.getMessage());
-            success = 0;
-        }
-
 
     }
 
@@ -188,7 +157,6 @@ public class First_time_welcome_page extends AppCompatActivity {
                 Certificate ca;
                 ca = cf.generateCertificate(caInput);
                 caInput.close();
-                // Create a KeyStore containing our trusted CAs
                 String keyStoreType = KeyStore.getDefaultType();
                 KeyStore keyStore = KeyStore.getInstance(keyStoreType);
                 keyStore.load(null, null);
@@ -265,7 +233,4 @@ public class First_time_welcome_page extends AppCompatActivity {
         }
 
     }
-
-
-
 }
