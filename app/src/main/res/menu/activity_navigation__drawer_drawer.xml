@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/Account_Info"
+
+            android:title="Account Info" />
+
+
+    </group><group android:checkableBehavior="single">
+        <item
+            android:id="@+id/About_Us"
+
+            android:title="About Us" />
+        <item
+            android:id="@+id/Privacy_Policy"
+
+            android:title="Privacy Policy" />
+    </group>
+
+
+        <group android:checkableBehavior="single">
+            <item
+                android:id="@+id/Past_Orders"
+
+                android:title="Past_Orders" />
+            <item
+                android:id="@+id/Statistics"
+
+                android:title="Statistics" />
+        </group>
+</menu>
