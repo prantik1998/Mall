@@ -1,6 +1,7 @@
 package com.autonise.myapplication;
 
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.BaseTransientBottomBar;
@@ -24,23 +25,41 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
+//import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.security.KeyStore;
+import java.security.cert.CertificateFactory;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
-public class First_time_welcome_page extends AppCompatActivity{
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import java.security.cert.Certificate;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.net.ssl.TrustManagerFactory;
+import javax.security.cert.X509Certificate;
+
+public class First_time_welcome_page extends AppCompatActivity {
 
     int RC_SIGN_IN = 0;
     String TAG = "tag:0";
     String ERRORTAG = "errortag:0";
-    String url="http://10.0.2.2:6012";
+    String url="https://10.0.2.2:6012";
     int success = 1;
 //    String url="http://stackoverflow.com";
 
@@ -86,7 +105,7 @@ public class First_time_welcome_page extends AppCompatActivity{
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-            Log.d(TAG, "ONactivityresult");
+            Log.d(TAG, "OnActivityResult");
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
@@ -100,28 +119,50 @@ public class First_time_welcome_page extends AppCompatActivity{
     }
     private void handleSignInResult(GoogleSignInAccount account) {
         Log.d(TAG, "handleSignInResult");
-
-        String filename = getApplicationContext().getFilesDir().toString()+"/User_information.json";
-
-        JSONObject obj = new JSONObject();
-
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = df.format(c.getTime());
-
-        Log.d("tag", formattedDate);
-
         try {
-            obj.put("DisplayName", account.getDisplayName());
-            obj.put("Email", account.getEmail());
-            obj.put("Id", account.getId());
-            obj.put("PhotoURL", account.getPhotoUrl());
-            obj.put("Date", formattedDate);
+//            String filename = getApplicationContext().getFilesDir().toString()+"/User_information.json";
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = df.format(c.getTime());
+
+//            JSONObject obj = new JSONObject();
+
+            Map<String,Object> obj_map = new LinkedHashMap<>();
+
+            obj_map.put("DisplayName", account.getDisplayName());
+            obj_map.put("Email", account.getEmail());
+            obj_map.put("Id", account.getId());
+            obj_map.put("PhotoURL", account.getPhotoUrl());
+            obj_map.put("Date", formattedDate);
+
+            StringBuilder postData = new StringBuilder();
+            for (Map.Entry<String,Object> param : obj_map.entrySet()) {
+                if (postData.length() != 0) postData.append('&');
+                postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+                postData.append('=');
+                postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+            }
+            byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+
+//            obj.put("DisplayName", account.getDisplayName());
+//            obj.put("Email", account.getEmail());
+//            obj.put("Id", account.getId());
+//            obj.put("PhotoURL", account.getPhotoUrl());
+//            obj.put("Date", formattedDate);
+            Log.d(TAG, "getting into http");
+
+
+            new send_data().execute(postDataBytes.toString());
         }
-        catch (JSONException e) {
-            success = 0;
+        catch (java.io.UnsupportedEncodingException e)
+        {
             Log.d(TAG+"0", e.getMessage());
         }
+//        catch (JSONException e) {
+//            success = 0;
+//            Log.d(TAG+"0", e.getMessage());
+//        }
 
         try {
             FileWriter file = new FileWriter(filename);
@@ -132,52 +173,80 @@ public class First_time_welcome_page extends AppCompatActivity{
             Log.d(TAG+"1", e.getMessage());
             success = 0;
         }
-        Log.d(TAG, "getting into http");
 
-
-        new send_data().execute(obj.toString());
 
     }
 
-    public class send_data extends AsyncTask<String, Void, String> {
+    public class send_data extends AsyncTask<String, Void, String>{
 
         protected String doInBackground(String... params) {
             // TODO Auto-generated method stub
+
             try {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                InputStream caInput = new BufferedInputStream(getAssets().open("cert.crt"));
+                Certificate ca;
+                ca = cf.generateCertificate(caInput);
+                caInput.close();
+                // Create a KeyStore containing our trusted CAs
+                String keyStoreType = KeyStore.getDefaultType();
+                KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+                keyStore.load(null, null);
+                keyStore.setCertificateEntry("ca", ca);
+                String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+                tmf.init(keyStore);
+                SSLContext context = SSLContext.getInstance("TLS");
+                context.init(null, tmf.getTrustManagers(), null);
+                HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        // ToDo Actually verify the host here
+                        return true;
+                    }
+                };
+
 
                 URL object = new URL(url);
-                try {
-                    HttpURLConnection con = (HttpURLConnection) object.openConnection();
-                    try
-                    {
-                        con.setRequestMethod("POST");
-                    }
-                    catch (java.net.ProtocolException e) {
-                        Log.d(TAG + "1", e.getMessage());
-                        success = 0;
-                    }
-                    con.setDoOutput(true);
+                HttpsURLConnection con = (HttpsURLConnection) object.openConnection();
 
-                    OutputStream asdf = con.getOutputStream();
+                con.setSSLSocketFactory(context.getSocketFactory());
+                con.setHostnameVerifier(hostnameVerifier);
 
-                    OutputStreamWriter wr = new OutputStreamWriter(asdf);
-                    Log.d(TAG + "1", params[0]);
-                    wr.write(params[0]);
-                    wr.flush();
-                    wr.close();
-                    asdf.close();
-                    int responseCode = con.getResponseCode();
-                    Log.d(TAG + "1", Integer.toString(responseCode));
-                }
-                catch (IOException e) {
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
 
-                    Log.d(TAG + "01", e.getMessage());
-                    success = 0;
-                }
-            }
-            catch(java.net.MalformedURLException e)
-            {
-                Log.d(TAG+"1", e.getMessage());
+                Log.d(TAG, "got into https");
+
+                OutputStream asdf = con.getOutputStream();
+
+                OutputStreamWriter wr = new OutputStreamWriter(asdf);
+                Log.d(TAG + "1", params[0]);
+
+                wr.write(params[0]);
+                wr.flush();
+                wr.close();
+                asdf.close();
+                int responseCode = con.getResponseCode();
+                Log.d(TAG + "1", Integer.toString(responseCode));
+
+            } catch (java.security.cert.CertificateException e) {
+                Log.d(TAG, e.getMessage());
+                success = 0;
+            } catch (java.io.FileNotFoundException e) {
+                Log.d(TAG, e.getMessage());
+                success = 0;
+            } catch (java.io.IOException e) {
+                Log.d(TAG, e.getMessage());
+                success = 0;
+            } catch (java.security.KeyStoreException e) {
+                Log.d(TAG, e.getMessage());
+                success = 0;
+            } catch (java.security.NoSuchAlgorithmException e) {
+                Log.d(TAG, e.getMessage());
+                success = 0;
+            } catch (java.security.KeyManagementException e) {
+                Log.d(TAG, e.getMessage());
                 success = 0;
             }
             return url;

@@ -2,11 +2,7 @@ package com.autonise.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
             f.delete();
             first_time_welcome();
         }
-
     }
     public void first_time_welcome() {
         Intent intent = new Intent(this, First_time_welcome_page.class);
